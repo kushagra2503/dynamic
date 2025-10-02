@@ -1,0 +1,75 @@
+# Build artifacts
+.build/
+*.build/
+*.xcodeproj/
+*.xcworkspace/
+*.pbxproj
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+Package.resolved
+.swiftpm/
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
