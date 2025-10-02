@@ -100,6 +100,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func handleIslandExpansion(_ expanded: Bool) {
         guard let window = window else { return }
 
+        // Only update if state actually changed to prevent unnecessary animations
+        guard islandExpanded != expanded else { return }
+
         islandExpanded = expanded
 
         let newSize = NotchDetector.getOptimalIslandSize(expanded: expanded)
@@ -124,8 +127,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             window.animator().setFrame(newFrame, display: true)
         }
-
-
     }
 
     private func positionWindowOverNotch(animated: Bool) {

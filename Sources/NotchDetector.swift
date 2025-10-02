@@ -99,7 +99,7 @@ class NotchDetector {
     /// Detects notch dimensions based on screen characteristics
     private static func detectNotchDimensions(screenFrame: NSRect, safeAreaTop: CGFloat) -> NSSize {
         let screenWidth = screenFrame.width
-        let screenHeight = screenFrame.height
+        let _ = screenFrame.height
 
         // MacBook Pro 14" and 16" have different notch sizes
         // Detect based on screen resolution

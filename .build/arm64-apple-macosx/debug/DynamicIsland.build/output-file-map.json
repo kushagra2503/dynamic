@@ -9,6 +9,13 @@
     "swift-dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swiftdeps",
     "diagnostics": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.dia"
   },
+  "/Users/yashree/Desktop/dynamic/Sources/BatteryMonitor.swift": {
+    "dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor.d",
+    "object": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor.swift.o",
+    "swiftmodule": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor~partial.swiftmodule",
+    "swift-dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor.swiftdeps",
+    "diagnostics": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor.dia"
+  },
   "/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift": {
     "dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.d",
     "object": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o",

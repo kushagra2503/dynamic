@@ -28,6 +28,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/yashree/Desktop/dynamic/Sources/BatteryMonitor.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift"
         },
         {
@@ -48,6 +52,7 @@
       "moduleOutputPath" : "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/Modules/DynamicIsland.swiftmodule",
       "objects" : [
         "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swift.o",
+        "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor.swift.o",
         "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o",
         "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.swift.o"
       ],
@@ -103,6 +108,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o"
         },
         {
@@ -117,6 +126,7 @@
       "prepareForIndexing" : false,
       "sources" : [
         "/Users/yashree/Desktop/dynamic/Sources/AppDelegate.swift",
+        "/Users/yashree/Desktop/dynamic/Sources/BatteryMonitor.swift",
         "/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift",
         "/Users/yashree/Desktop/dynamic/Sources/NotchDetector.swift"
       ],
@@ -136,6 +146,7 @@
       "dynamic",
       "-c",
       "/Users/yashree/Desktop/dynamic/Sources/AppDelegate.swift",
+      "/Users/yashree/Desktop/dynamic/Sources/BatteryMonitor.swift",
       "/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift",
       "/Users/yashree/Desktop/dynamic/Sources/NotchDetector.swift",
       "-I",
@@ -230,6 +241,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/yashree/Desktop/dynamic/Sources/BatteryMonitor.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift"
         },
         {
@@ -249,6 +264,10 @@
         {
           "kind" : "file",
           "name" : "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/BatteryMonitor.swift.o"
         },
         {
           "kind" : "file",
