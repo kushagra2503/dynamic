@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "DynamicIsland-arm64-apple-macosx26.0-debug.exe": ["<DynamicIsland-arm64-apple-macosx26.0-debug.exe>"]
+  "DynamicIsland-arm64-apple-macosx26.0-debug.module": ["<DynamicIsland-arm64-apple-macosx26.0-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<DynamicIsland-arm64-apple-macosx26.0-debug.exe>","<DynamicIsland-arm64-apple-macosx26.0-debug.module>"]
+  "test": ["<DynamicIsland-arm64-apple-macosx26.0-debug.exe>","<DynamicIsland-arm64-apple-macosx26.0-debug.module>"]
+default: "main"
+nodes:
+  "/Users/yashree/Desktop/dynamic/Sources/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland":
+    is-mutated: true
+commands:
+  "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland-entitlement.plist"]
+    description: "Write auxiliary file /Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland-entitlement.plist"
+
+  "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/yashree/Desktop/dynamic/Sources/AppDelegate.swift","/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift","/Users/yashree/Desktop/dynamic/Sources/NotchDetector.swift"]
+    outputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/sources"]
+    description: "Write auxiliary file /Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/sources"
+
+  "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.swift.o"]
+    outputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.product/Objects.LinkFileList"
+
+  "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Library/Developer/CommandLineTools/usr/bin/swiftc"]
+    outputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+
+  "<DynamicIsland-arm64-apple-macosx26.0-debug.exe>":
+    tool: phony
+    inputs: ["<DynamicIsland-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    outputs: ["<DynamicIsland-arm64-apple-macosx26.0-debug.exe>"]
+
+  "<DynamicIsland-arm64-apple-macosx26.0-debug.module>":
+    tool: phony
+    inputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/Modules/DynamicIsland.swiftmodule"]
+    outputs: ["<DynamicIsland-arm64-apple-macosx26.0-debug.module>"]
+
+  "C.DynamicIsland-arm64-apple-macosx26.0-debug.exe":
+    tool: shell
+    inputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.product/Objects.LinkFileList"]
+    outputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/DynamicIsland"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-L","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug","-o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland","-module-name","DynamicIsland","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_DynamicIsland_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.product/Objects.LinkFileList","-target","arm64-apple-macosx13.0","-Xlinker","-add_ast_path","-Xlinker","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/Modules/DynamicIsland.swiftmodule","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g"]
+
+  "C.DynamicIsland-arm64-apple-macosx26.0-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland-entitlement.plist"]
+    outputs: ["<DynamicIsland-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/DynamicIsland"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland-entitlement.plist","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland"]
+
+  "C.DynamicIsland-arm64-apple-macosx26.0-debug.module":
+    tool: shell
+    inputs: ["/Users/yashree/Desktop/dynamic/Sources/AppDelegate.swift","/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift","/Users/yashree/Desktop/dynamic/Sources/NotchDetector.swift","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/sources"]
+    outputs: ["/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.swift.o","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/Modules/DynamicIsland.swiftmodule"]
+    description: "Compiling Swift Module 'DynamicIsland' (3 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","DynamicIsland","-emit-dependencies","-emit-module","-emit-module-path","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/Modules/DynamicIsland.swiftmodule","-output-file-map","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/output-file-map.json","-incremental","-c","@/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/sources","-I","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx13.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","DynamicIsland_main","-color-diagnostics","-swift-version","5","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-package-name","dynamic"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/yashree/Desktop/dynamic/Sources/","/Users/yashree/Desktop/dynamic/Package.swift","/Users/yashree/Desktop/dynamic/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

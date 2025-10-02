@@ -1,0 +1,26 @@
+{
+  "": {
+    "swift-dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/master.swiftdeps"
+  },
+  "/Users/yashree/Desktop/dynamic/Sources/AppDelegate.swift": {
+    "dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.d",
+    "object": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swift.o",
+    "swiftmodule": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate~partial.swiftmodule",
+    "swift-dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.swiftdeps",
+    "diagnostics": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/AppDelegate.dia"
+  },
+  "/Users/yashree/Desktop/dynamic/Sources/DynamicIslandView.swift": {
+    "dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.d",
+    "object": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swift.o",
+    "swiftmodule": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView~partial.swiftmodule",
+    "swift-dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.swiftdeps",
+    "diagnostics": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/DynamicIslandView.dia"
+  },
+  "/Users/yashree/Desktop/dynamic/Sources/NotchDetector.swift": {
+    "dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.d",
+    "object": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.swift.o",
+    "swiftmodule": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector~partial.swiftmodule",
+    "swift-dependencies": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.swiftdeps",
+    "diagnostics": "/Users/yashree/Desktop/dynamic/.build/arm64-apple-macosx/debug/DynamicIsland.build/NotchDetector.dia"
+  }
+}
