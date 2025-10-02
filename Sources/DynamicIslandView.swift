@@ -28,11 +28,12 @@ struct DynamicIslandContent: View {
     let isCharging: Bool
     let batteryLevel: Int
     let chargingTimeRemaining: String
+    let showChargingContent: Bool
     let forceExpanded: Bool
 
     var body: some View {
         if isExpanded {
-            if isCharging && forceExpanded {
+            if isCharging && (forceExpanded || showChargingContent) {
                 // Charging content
                 HStack(spacing: 12) {
                     // Left side - charging icon and status
@@ -102,7 +103,7 @@ struct DynamicIslandContent: View {
                 .padding(.vertical, 8)
             }
         } else {
-            if isCharging && forceExpanded {
+            if isCharging && (forceExpanded || showChargingContent) {
                 // Collapsed charging indicator - only during automatic expansion
                 HStack(spacing: 4) {
                     Image(systemName: "bolt.fill")
@@ -130,7 +131,7 @@ struct DynamicIslandView: View {
     @State private var lastHoverState = false
     @State private var forceExpanded = false
     @State private var forceExpandedTimer: Timer?
-    // Remove showChargingContent - use forceExpanded + isCharging instead
+    @State private var showChargingContent = false
 
     // Battery monitoring
     @StateObject private var batteryMonitor = BatteryMonitor.shared
@@ -180,11 +181,18 @@ struct DynamicIslandView: View {
                 isCharging: batteryMonitor.isCharging,
                 batteryLevel: batteryMonitor.batteryLevel,
                 chargingTimeRemaining: chargingTimeRemaining,
+                showChargingContent: showChargingContent,
                 forceExpanded: forceExpanded
             )
             .onChange(of: forceExpanded) { newValue in
                 // Ensure AppDelegate is notified when forceExpanded changes
                 onExpansionChange?(newValue || isExpanded)
+            }
+            .onChange(of: showChargingContent) { newValue in
+                // Start auto-collapse timer when charging content appears
+                if newValue {
+                    startChargingAutoCollapse()
+                }
             }
         }
         .frame(
@@ -217,9 +225,10 @@ struct DynamicIslandView: View {
                 return
             }
 
-            // Manual hover cancels force expansion
+            // Manual hover cancels force expansion and charging content
             if hovering && forceExpanded {
                 forceExpanded = false
+                showChargingContent = false
             }
 
             // Add smooth animation only during state change
@@ -235,9 +244,10 @@ struct DynamicIslandView: View {
             lastHoverState = newState
             isHovering = newState
 
-            // Manual tap cancels force expansion
+            // Manual tap cancels force expansion and charging content
             if forceExpanded {
                 forceExpanded = false
+                showChargingContent = false
             }
 
             // Add smooth animation for manual toggle
@@ -296,20 +306,26 @@ struct DynamicIslandView: View {
 
         updateChargingTime()
 
-        // Show charging animation when plugged in
+        // Show charging animation when plugged in - instant content display
         if !wasPluggedIn && isPluggedIn {
-            showChargingIndicator()
+            // Show charging content and expansion immediately
+            showChargingContent = true
+            forceExpanded = true
+            onExpansionChange?(true)
         }
 
-        // If we start actually charging after plugging in, keep the indicator visible
+        // If we start actually charging after plugging in, ensure content is visible
         if !wasCharging && isCharging && isPluggedIn {
+            showChargingContent = true
             if !forceExpanded {
-                showChargingIndicator()
+                forceExpanded = true
+                onExpansionChange?(true)
             }
         }
 
         // Hide when unplugged
         if wasPluggedIn && !isPluggedIn {
+            showChargingContent = false
             hideChargingIndicator()
         }
 
@@ -317,9 +333,9 @@ struct DynamicIslandView: View {
         if wasCharging && !isCharging && isPluggedIn {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 if !self.isHovering && self.forceExpanded && !self.batteryMonitor.isCharging {
-                    print("DEBUG: Auto-collapsing after 5 seconds - not charging")
                     withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                         self.forceExpanded = false
+                        self.showChargingContent = false
                     }
                     // Notify AppDelegate about collapse to return to exact notch size
                     self.onExpansionChange?(false)
@@ -328,17 +344,13 @@ struct DynamicIslandView: View {
         }
     }
 
-    private func showChargingIndicator() {
-        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-            forceExpanded = true
-        }
-
+    private func startChargingAutoCollapse() {
         // Auto-collapse after 2 seconds if actively charging, or 5 seconds if not charging
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             if !self.isHovering && self.forceExpanded && self.batteryMonitor.isCharging {
-                print("DEBUG: Auto-collapsing after 2 seconds while charging")
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                     self.forceExpanded = false
+                    self.showChargingContent = false
                 }
                 // Notify AppDelegate about collapse to return to exact notch size
                 self.onExpansionChange?(false)
@@ -348,24 +360,21 @@ struct DynamicIslandView: View {
         // Fallback: Auto-collapse after 5 seconds if not charging
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
             if !self.isHovering && self.forceExpanded && !self.batteryMonitor.isCharging {
-                print("DEBUG: Charging stopped - collapsing after delay")
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                     self.forceExpanded = false
+                    self.showChargingContent = false
                 }
                 // Notify AppDelegate about collapse to return to exact notch size
                 self.onExpansionChange?(false)
             }
         }
-
-        // Notify about expansion
-        onExpansionChange?(true)
     }
 
     private func hideChargingIndicator() {
         if forceExpanded && !isHovering {
-            print("DEBUG: hideChargingIndicator - collapsing to normal size")
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 forceExpanded = false
+                showChargingContent = false
             }
             // Notify AppDelegate about collapse to return to exact notch size
             onExpansionChange?(false)
