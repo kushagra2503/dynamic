@@ -182,7 +182,10 @@ struct DynamicIslandView: View {
                 chargingTimeRemaining: chargingTimeRemaining,
                 forceExpanded: forceExpanded
             )
-
+            .onChange(of: forceExpanded) { newValue in
+                // Ensure AppDelegate is notified when forceExpanded changes
+                onExpansionChange?(newValue || isExpanded)
+            }
         }
         .frame(
             width: (isExpanded || forceExpanded) ? 380 : NotchDetector.getOptimalIslandSize(expanded: false).width,
@@ -314,9 +317,12 @@ struct DynamicIslandView: View {
         if wasCharging && !isCharging && isPluggedIn {
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 if !self.isHovering && self.forceExpanded && !self.batteryMonitor.isCharging {
+                    print("DEBUG: Auto-collapsing after 5 seconds - not charging")
                     withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                         self.forceExpanded = false
                     }
+                    // Notify AppDelegate about collapse to return to exact notch size
+                    self.onExpansionChange?(false)
                 }
             }
         }
@@ -330,18 +336,24 @@ struct DynamicIslandView: View {
         // Auto-collapse after 2 seconds if actively charging, or 5 seconds if not charging
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             if !self.isHovering && self.forceExpanded && self.batteryMonitor.isCharging {
+                print("DEBUG: Auto-collapsing after 2 seconds while charging")
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                     self.forceExpanded = false
                 }
+                // Notify AppDelegate about collapse to return to exact notch size
+                self.onExpansionChange?(false)
             }
         }
 
         // Fallback: Auto-collapse after 5 seconds if not charging
         DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
             if !self.isHovering && self.forceExpanded && !self.batteryMonitor.isCharging {
+                print("DEBUG: Charging stopped - collapsing after delay")
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                     self.forceExpanded = false
                 }
+                // Notify AppDelegate about collapse to return to exact notch size
+                self.onExpansionChange?(false)
             }
         }
 
@@ -351,13 +363,13 @@ struct DynamicIslandView: View {
 
     private func hideChargingIndicator() {
         if forceExpanded && !isHovering {
+            print("DEBUG: hideChargingIndicator - collapsing to normal size")
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 forceExpanded = false
             }
+            // Notify AppDelegate about collapse to return to exact notch size
+            onExpansionChange?(false)
         }
-
-        // Notify about potential collapse
-        onExpansionChange?(isExpanded)
     }
 
     private func updateChargingTime() {

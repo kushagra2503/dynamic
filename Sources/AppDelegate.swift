@@ -103,12 +103,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Only update if state actually changed to prevent unnecessary animations
         guard islandExpanded != expanded else { return }
 
+        print("DEBUG: handleIslandExpansion - expanded: \(expanded), current islandExpanded: \(islandExpanded)")
+
         islandExpanded = expanded
 
         let newSize = NotchDetector.getOptimalIslandSize(expanded: expanded)
+        print("DEBUG: newSize - width: \(newSize.width), height: \(newSize.height)")
 
         // Get the optimal position for the new size
         guard let newPosition = NotchDetector.getDynamicIslandPosition(expanded: expanded) else {
+            print("DEBUG: Failed to get optimal position")
             return
         }
 
@@ -119,6 +123,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             height: newSize.height
         )
 
+        print("DEBUG: newFrame - x: \(newFrame.origin.x), y: \(newFrame.origin.y), w: \(newFrame.width), h: \(newFrame.height)")
+
         // Always animate window frame changes for smooth transitions
         NSAnimationContext.runAnimationGroup { context in
             context.duration = expanded ? 0.5 : 0.4
@@ -127,6 +133,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             window.animator().setFrame(newFrame, display: true)
         }
+
+        print("DEBUG: Animation completed for expanded: \(expanded)")
     }
 
     private func positionWindowOverNotch(animated: Bool) {
