@@ -6,6 +6,7 @@ import QuartzCore
 class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow?
     var statusItem: NSStatusItem?
+    private var islandExpanded = false
 
     static func main() {
         let app = NSApplication.shared
@@ -15,11 +16,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Start monitoring for screen changes
+        NotchDetector.startMonitoringScreenChanges()
+
         // Create the dynamic island window
         createDynamicIslandWindow()
 
         // Create a status bar item to keep the app running
         createStatusItem()
+
+        // Monitor for screen parameter changes to reposition the island
+        setupScreenChangeMonitoring()
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        NotchDetector.stopMonitoringScreenChanges()
     }
 
     private func createDynamicIslandWindow() {
@@ -42,10 +53,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window?.hasShadow = false
         window?.ignoresMouseEvents = false
         window?.level = .statusBar
-        window?.collectionBehavior = [.canJoinAllSpaces, .stationary]
+        window?.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
 
-        // Position over the notch initially
-        positionWindowOverNotch()
+        // Position perfectly over the notch
+        positionWindowOverNotch(animated: false)
 
         window?.makeKeyAndOrderFront(nil)
     }
@@ -53,13 +64,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func createStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem?.button?.title = "🏝️"
-        statusItem?.menu = createMenu()
+        statusItem?.button?.toolTip = "Dynamic Island"
+
+        let menu = createMenu()
+        statusItem?.menu = menu
     }
 
     private func createMenu() -> NSMenu {
         let menu = NSMenu()
+
+        // Add repositioning option
+        menu.addItem(NSMenuItem(
+            title: "Reposition Island",
+            action: #selector(repositionIsland),
+            keyEquivalent: "r"
+        ))
+
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
+
         return menu
+    }
+
+
+
+    @objc private func repositionIsland() {
+        NotchDetector.clearCache()
+        positionWindowOverNotch(animated: true)
     }
 
     @objc private func quit() {
@@ -69,43 +100,100 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func handleIslandExpansion(_ expanded: Bool) {
         guard let window = window else { return }
 
-        let newSize = NotchDetector.getOptimalIslandSize(expanded: expanded)
-        guard let notchRect = NotchDetector.getNotchRect() else { return }
+        islandExpanded = expanded
 
-        // Calculate new frame to overlap the notch (wider expansion centered)
+        let newSize = NotchDetector.getOptimalIslandSize(expanded: expanded)
+
+        // Get the optimal position for the new size
+        guard let newPosition = NotchDetector.getDynamicIslandPosition(expanded: expanded) else {
+            return
+        }
+
         let newFrame = NSRect(
-            x: notchRect.origin.x + (notchRect.width - newSize.width) / 2,
-            y: notchRect.origin.y,
+            x: newPosition.x,
+            y: newPosition.y,
             width: newSize.width,
             height: newSize.height
         )
 
-        // Use a more performant animation
+        // Smooth animation with proper timing
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.4
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            context.allowsImplicitAnimation = false
-            window.animator().setFrame(newFrame, display: false)
+            context.duration = expanded ? 0.5 : 0.4
+            context.timingFunction = CAMediaTimingFunction(name: expanded ? .easeOut : .easeInEaseOut)
+            context.allowsImplicitAnimation = true
+
+            window.animator().setFrame(newFrame, display: true)
         }
+
+
     }
 
-    private func positionWindowOverNotch() {
+    private func positionWindowOverNotch(animated: Bool) {
         guard let window = window else { return }
 
-        // Use NotchDetector to get the optimal position
-        guard let notchRect = NotchDetector.getNotchRect() else { return }
+        let currentSize = NotchDetector.getOptimalIslandSize(expanded: islandExpanded)
 
-        // Set initial size to compact version
-        let initialSize = NotchDetector.getOptimalIslandSize(expanded: false)
+        guard let position = NotchDetector.getDynamicIslandPosition(expanded: islandExpanded) else {
+            // Fallback positioning if notch detection fails
+            guard let screen = NSScreen.main else { return }
+            let screenFrame = screen.frame
+            let fallbackFrame = NSRect(
+                x: (screenFrame.width - currentSize.width) / 2,
+                y: screenFrame.height - currentSize.height - 8,
+                width: currentSize.width,
+                height: currentSize.height
+            )
+            window.setFrame(fallbackFrame, display: true, animate: animated)
+            return
+        }
 
-        // Position to exactly overlap the notch
         let windowFrame = NSRect(
-            x: notchRect.origin.x,
-            y: notchRect.origin.y,
-            width: initialSize.width,
-            height: initialSize.height
+            x: position.x,
+            y: position.y,
+            width: currentSize.width,
+            height: currentSize.height
         )
 
-        window.setFrame(windowFrame, display: true)
+        window.setFrame(windowFrame, display: true, animate: animated)
+    }
+
+    private func setupScreenChangeMonitoring() {
+        // Monitor for display configuration changes
+        NotificationCenter.default.addObserver(
+            forName: NSApplication.didChangeScreenParametersNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            // Delay repositioning to ensure screen parameters are fully updated
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self?.positionWindowOverNotch(animated: true)
+            }
+        }
+
+        // Monitor for space changes (Mission Control, switching desktops)
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            // Ensure the island stays visible when switching spaces
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                self?.window?.orderFront(nil)
+            }
+        }
+    }
+}
+
+// MARK: - Window Delegate
+extension AppDelegate: NSWindowDelegate {
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        // Prevent the window from being closed
+        return false
+    }
+
+    func windowDidBecomeKey(_ notification: Notification) {
+        // Keep the island at the correct level
+        window?.level = .statusBar
     }
 }
