@@ -28,11 +28,11 @@ struct DynamicIslandContent: View {
     let isCharging: Bool
     let batteryLevel: Int
     let chargingTimeRemaining: String
-    let showChargingContent: Bool
+    let forceExpanded: Bool
 
     var body: some View {
         if isExpanded {
-            if isCharging && showChargingContent {
+            if isCharging && forceExpanded {
                 // Charging content
                 HStack(spacing: 12) {
                     // Left side - charging icon and status
@@ -102,7 +102,7 @@ struct DynamicIslandContent: View {
                 .padding(.vertical, 8)
             }
         } else {
-            if isCharging && showChargingContent {
+            if isCharging && forceExpanded {
                 // Collapsed charging indicator - only during automatic expansion
                 HStack(spacing: 4) {
                     Image(systemName: "bolt.fill")
@@ -130,7 +130,7 @@ struct DynamicIslandView: View {
     @State private var lastHoverState = false
     @State private var forceExpanded = false
     @State private var forceExpandedTimer: Timer?
-    @State private var showChargingContent = false
+    // Remove showChargingContent - use forceExpanded + isCharging instead
 
     // Battery monitoring
     @StateObject private var batteryMonitor = BatteryMonitor.shared
@@ -180,17 +180,9 @@ struct DynamicIslandView: View {
                 isCharging: batteryMonitor.isCharging,
                 batteryLevel: batteryMonitor.batteryLevel,
                 chargingTimeRemaining: chargingTimeRemaining,
-                showChargingContent: showChargingContent
+                forceExpanded: forceExpanded
             )
-            .onChange(of: showChargingContent) { newValue in
-                print("DEBUG: showChargingContent changed to: \(newValue)")
-            }
-            .onChange(of: forceExpanded) { newValue in
-                print("DEBUG: forceExpanded changed to: \(newValue)")
-            }
-            .onChange(of: batteryMonitor.isCharging) { newValue in
-                print("DEBUG: batteryMonitor.isCharging changed to: \(newValue)")
-            }
+
         }
         .frame(
             width: (isExpanded || forceExpanded) ? 380 : NotchDetector.getOptimalIslandSize(expanded: false).width,
@@ -210,8 +202,7 @@ struct DynamicIslandView: View {
 
             // Handle transition from charging expansion to manual hover
             if hovering && forceExpanded {
-                // User is hovering during charging expansion - keep expanded but hide charging content
-                showChargingContent = false
+                // User is hovering during charging expansion - transfer control to manual hover
                 forceExpanded = false // Transfer control to manual hover
                 isExpanded = true
                 onExpansionChange?(true)
@@ -223,9 +214,9 @@ struct DynamicIslandView: View {
                 return
             }
 
-            // Manual hover should not show charging content
-            if hovering {
-                showChargingContent = false
+            // Manual hover cancels force expansion
+            if hovering && forceExpanded {
+                forceExpanded = false
             }
 
             // Add smooth animation only during state change
@@ -241,8 +232,10 @@ struct DynamicIslandView: View {
             lastHoverState = newState
             isHovering = newState
 
-            // Manual tap should not show charging content
-            showChargingContent = false
+            // Manual tap cancels force expansion
+            if forceExpanded {
+                forceExpanded = false
+            }
 
             // Add smooth animation for manual toggle
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -298,37 +291,56 @@ struct DynamicIslandView: View {
         let wasPluggedIn = userInfo["wasPluggedIn"] as? Bool ?? false
         let isPluggedIn = userInfo["isPluggedIn"] as? Bool ?? false
 
-        print("DEBUG: Battery change - wasPluggedIn: \(wasPluggedIn), isPluggedIn: \(isPluggedIn), wasCharging: \(wasCharging), isCharging: \(isCharging)")
-
         updateChargingTime()
 
         // Show charging animation when plugged in
         if !wasPluggedIn && isPluggedIn {
-            print("DEBUG: Charger plugged in - calling showChargingIndicator")
             showChargingIndicator()
+        }
+
+        // If we start actually charging after plugging in, keep the indicator visible
+        if !wasCharging && isCharging && isPluggedIn {
+            if !forceExpanded {
+                showChargingIndicator()
+            }
         }
 
         // Hide when unplugged
         if wasPluggedIn && !isPluggedIn {
-            print("DEBUG: Charger unplugged - calling hideChargingIndicator")
             hideChargingIndicator()
+        }
+
+        // If charging stops but still plugged in (battery full), hide after delay
+        if wasCharging && !isCharging && isPluggedIn {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                if !self.isHovering && self.forceExpanded && !self.batteryMonitor.isCharging {
+                    withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                        self.forceExpanded = false
+                    }
+                }
+            }
         }
     }
 
     private func showChargingIndicator() {
-        print("DEBUG: showChargingIndicator - isCharging: \(batteryMonitor.isCharging), level: \(batteryMonitor.batteryLevel)")
         withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
             forceExpanded = true
-            showChargingContent = true
         }
-        print("DEBUG: After animation - forceExpanded: \(forceExpanded), showChargingContent: \(showChargingContent)")
 
-        // Auto-collapse after 5 seconds if not hovering
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-            if !self.isHovering && self.forceExpanded && self.showChargingContent {
+        // Auto-collapse after 2 seconds if actively charging, or 5 seconds if not charging
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            if !self.isHovering && self.forceExpanded && self.batteryMonitor.isCharging {
                 withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                     self.forceExpanded = false
-                    self.showChargingContent = false
+                }
+            }
+        }
+
+        // Fallback: Auto-collapse after 5 seconds if not charging
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            if !self.isHovering && self.forceExpanded && !self.batteryMonitor.isCharging {
+                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                    self.forceExpanded = false
                 }
             }
         }
@@ -341,7 +353,6 @@ struct DynamicIslandView: View {
         if forceExpanded && !isHovering {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
                 forceExpanded = false
-                showChargingContent = false
             }
         }
 

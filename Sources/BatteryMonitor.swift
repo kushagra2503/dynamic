@@ -117,7 +117,6 @@ class BatteryMonitor: ObservableObject {
 
             // Notify about charging state changes
             if wasCharging != isCharging || wasPluggedIn != isPluggedIn {
-                print("DEBUG BatteryMonitor: State change detected! wasPluggedIn:\(wasPluggedIn)->isPluggedIn:\(isPluggedIn), wasCharging:\(wasCharging)->isCharging:\(isCharging)")
                 DispatchQueue.main.async {
                     self.notifyChargingStateChanged(
                         wasCharging: wasCharging,
@@ -126,8 +125,6 @@ class BatteryMonitor: ObservableObject {
                         isPluggedIn: self.isPluggedIn
                     )
                 }
-            } else {
-                print("DEBUG BatteryMonitor: No state change - pluggedIn:\(isPluggedIn), charging:\(isCharging), level:\(batteryLevel)")
             }
 
             break // We only care about the first (internal) battery
@@ -135,7 +132,6 @@ class BatteryMonitor: ObservableObject {
     }
 
     private func notifyChargingStateChanged(wasCharging: Bool, isCharging: Bool, wasPluggedIn: Bool, isPluggedIn: Bool) {
-        print("DEBUG BatteryMonitor: Posting notification with userInfo - wasPluggedIn:\(wasPluggedIn), isPluggedIn:\(isPluggedIn), batteryLevel:\(batteryLevel)")
         let userInfo: [String: Any] = [
             "wasCharging": wasCharging,
             "isCharging": isCharging,
