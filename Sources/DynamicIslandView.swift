@@ -5,10 +5,7 @@ import Cocoa
 struct MacNotchShape: Shape {
     var isExpanded: Bool
 
-    var animatableData: Double {
-        get { isExpanded ? 1.0 : 0.0 }
-        set { isExpanded = newValue > 0.5 }
-    }
+    // Removed animatableData to prevent continuous animation
 
     func path(in rect: CGRect) -> Path {
         // Use detected notch corner radius for perfect matching
@@ -30,24 +27,22 @@ struct DynamicIslandContent: View {
 
     var body: some View {
         if isExpanded {
-            // Minimal expanded content - just empty space with subtle indicator
+            // Minimal expanded content
             HStack {
                 Spacer()
 
-                // Subtle activity indicator
+                // Simple dot indicator
                 Circle()
                     .fill(Color.white.opacity(0.3))
                     .frame(width: 6, height: 6)
-                    .scaleEffect(1.0)
-                    .animation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true), value: isExpanded)
 
                 Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
         } else {
-            // Collapsed content - completely minimal
-            EmptyView()
+            // Collapsed content - completely empty
+            Color.clear
         }
     }
 }
@@ -57,6 +52,7 @@ struct DynamicIslandView: View {
     @State private var isExpanded = false
     @State private var hoverTask: Task<Void, Never>?
     @State private var isHovering = false
+    @State private var lastHoverState = false
 
     let onExpansionChange: ((Bool) -> Void)?
 
@@ -103,35 +99,42 @@ struct DynamicIslandView: View {
             width: isExpanded ? 380 : NotchDetector.getOptimalIslandSize(expanded: false).width,
             height: isExpanded ? 64 : NotchDetector.getOptimalIslandSize(expanded: false).height
         )
-        .scaleEffect(isHovering && !isExpanded ? 1.02 : 1.0)
-        .animation(.spring(response: 0.4, dampingFraction: 0.7, blendDuration: 0.1), value: isExpanded)
-        .animation(.spring(response: 0.2, dampingFraction: 0.8), value: isHovering)
         .onHover { hovering in
+            // Immediate early return if same state
+            guard lastHoverState != hovering else {
+                return
+            }
+
+            // Update state immediately
+            lastHoverState = hovering
             isHovering = hovering
 
-            // Cancel previous hover task
+            // Cancel previous task
             hoverTask?.cancel()
 
-            hoverTask = Task {
-                // Add a small delay to prevent rapid toggling
-                try? await Task.sleep(nanoseconds: hovering ? 150_000_000 : 100_000_000) // 150ms for expand, 100ms for collapse
-
-                if !Task.isCancelled {
-                    await MainActor.run {
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                            isExpanded = hovering
-                            onExpansionChange?(hovering)
-                        }
-                    }
-                }
+            // Only change if different from current expanded state
+            guard isExpanded != hovering else {
+                return
             }
+
+            // Add smooth animation only during state change
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+                isExpanded = hovering
+            }
+            onExpansionChange?(hovering)
         }
         .onTapGesture {
-            // Manual toggle on tap
+            // Manual toggle on tap - cancel any hover tasks
+            hoverTask?.cancel()
+            let newState = !isExpanded
+            lastHoverState = newState
+            isHovering = newState
+
+            // Add smooth animation for manual toggle
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                isExpanded.toggle()
-                onExpansionChange?(isExpanded)
+                isExpanded = newState
             }
+            onExpansionChange?(newState)
         }
         // Accessibility
         .accessibilityElement()

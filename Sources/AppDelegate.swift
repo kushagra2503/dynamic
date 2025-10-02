@@ -116,11 +116,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             height: newSize.height
         )
 
-        // Smooth animation with proper timing
+        // Always animate window frame changes for smooth transitions
         NSAnimationContext.runAnimationGroup { context in
             context.duration = expanded ? 0.5 : 0.4
             context.timingFunction = CAMediaTimingFunction(name: expanded ? .easeOut : .easeInEaseOut)
-            context.allowsImplicitAnimation = true
+            context.allowsImplicitAnimation = false
 
             window.animator().setFrame(newFrame, display: true)
         }
