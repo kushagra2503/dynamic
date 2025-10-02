@@ -72,7 +72,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let newSize = NotchDetector.getOptimalIslandSize(expanded: expanded)
         guard let notchRect = NotchDetector.getNotchRect() else { return }
 
-        // Calculate new frame centered on the notch
+        // Calculate new frame to overlap the notch (wider expansion centered)
         let newFrame = NSRect(
             x: notchRect.origin.x + (notchRect.width - newSize.width) / 2,
             y: notchRect.origin.y,
@@ -98,8 +98,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Set initial size to compact version
         let initialSize = NotchDetector.getOptimalIslandSize(expanded: false)
 
+        // Position to exactly overlap the notch
         let windowFrame = NSRect(
-            x: notchRect.origin.x + (notchRect.width - initialSize.width) / 2,
+            x: notchRect.origin.x,
             y: notchRect.origin.y,
             width: initialSize.width,
             height: initialSize.height
